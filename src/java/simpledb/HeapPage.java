@@ -65,21 +65,17 @@ public class HeapPage implements Page {
     /** Retrieve the number of tuples on this page.
         @return the number of tuples on this page
     */
-    private int getNumTuples() {        
-        // some code goes here
-        return 0;
-
+    private int getNumTuples() {
+        final int size = td.getSize();
+        return (int) Math.floor((BufferPool.getPageSize() * 8) / (size * 8 + 1));
     }
 
     /**
      * Computes the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      * @return the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      */
-    private int getHeaderSize() {        
-        
-        // some code goes here
-        return 0;
-                 
+    private int getHeaderSize() {
+    	return (int) Math.ceil(1.0 * getNumTuples() / 8);
     }
     
     /** Return a view of this page before it was modified
@@ -111,8 +107,7 @@ public class HeapPage implements Page {
      * @return the PageId associated with this page.
      */
     public HeapPageId getId() {
-    // some code goes here
-    throw new UnsupportedOperationException("implement this");
+    	return this.pid;
     }
 
     /**
@@ -281,16 +276,27 @@ public class HeapPage implements Page {
      * Returns the number of empty slots on this page.
      */
     public int getNumEmptySlots() {
-        // some code goes here
-        return 0;
+        int s = 0;
+        for (byte b : header) {
+            for (int i = 0; i < 8; i++) {
+                if(b == 0){
+                    s += 8 - i;
+                    break;
+                }
+                if((b & 0x01) == 0) s += 1;
+                b >>= 1;
+            }
+        }
+        return s;
     }
 
     /**
      * Returns true if associated slot on this page is filled.
      */
     public boolean isSlotUsed(int i) {
-        // some code goes here
-        return false;
+        final int i1 = i / 8;
+        final byte b = header[i1];
+        return (b >> i % 8 & 0x01)>0;
     }
 
     /**
@@ -306,8 +312,35 @@ public class HeapPage implements Page {
      * (note that this iterator shouldn't return tuples in empty slots!)
      */
     public Iterator<Tuple> iterator() {
-        // some code goes here
-        return null;
+    	return new Iterator<Tuple>() {
+    	    private Tuple nextTuple = null;
+    	    private int index = 0;
+            @Override
+            public boolean hasNext() {
+            	if(nextTuple != null){
+            	    return true;
+                }
+                while(index < numSlots){
+                	if(isSlotUsed(index)){
+                	    nextTuple = tuples[index];
+                	    index++;
+                	    return true;
+                    }
+                    index++;
+                }
+                return false;
+            }
+
+            @Override
+            public Tuple next() {
+            	if(hasNext()){
+                    Tuple nextTable = this.nextTuple;
+                    this.nextTuple = null;
+                    return nextTable;
+                }
+                throw new NoSuchElementException();
+            }
+        };
     }
 
 }
