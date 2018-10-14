@@ -29,3 +29,5 @@ log
 hs_err_pid*
 
 /.idea/
+/src/simple-db-hw.iml
+/simple-db-hw1.iml
