@@ -77,6 +77,7 @@ public class TupleDescTest extends SimpleDbTestBase {
             TupleDesc td = Utility.getTupleDesc(len);
             for (int i = 0; i < len; ++i)
                 assertEquals(Type.INT_TYPE, td.getFieldType(i));
+
         }
     }
     
