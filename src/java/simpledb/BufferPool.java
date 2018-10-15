@@ -2,6 +2,9 @@ package simpledb;
 
 import java.io.*;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,6 +28,9 @@ public class BufferPool {
     other classes. BufferPool should use the numPages argument to the
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
+    private final Page[] pages;
+    private final Map<PageId, Page> pageTable;
+    private final LinkedList<Integer> freePageIndex;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -32,7 +38,12 @@ public class BufferPool {
      * @param numPages maximum number of pages in this buffer pool.
      */
     public BufferPool(int numPages) {
-
+        this.pages = new Page[numPages];
+        this.pageTable = new HashMap<>();
+        this.freePageIndex = new LinkedList<>();
+        for (int i = 0; i < pages.length; i++) {
+            freePageIndex.push(i);
+        }
     }
     
     public static int getPageSize() {
@@ -66,8 +77,19 @@ public class BufferPool {
      */
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+        final Page page = this.pageTable.get(pid);
+        if(page != null){
+            return page;
+        }
+        if(freePageIndex.isEmpty()){
+            throw new DbException("The buffer pool is full");
+        }
+        final Integer index = freePageIndex.pop();
+        final DbFile databaseFile = Database.getCatalog().getDatabaseFile(pid.getTableId());
+        final Page readPage = databaseFile.readPage(pid);
+        pages[index] = readPage;
+        this.pageTable.put(pid, readPage);
+        return readPage;
     }
 
     /**
