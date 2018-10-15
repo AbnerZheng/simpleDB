@@ -69,6 +69,7 @@ public class IntegerAggregator implements Aggregator {
 	public OpIterator iterator() {
 		return new OpIterator() {
 
+			private TupleDesc tupleDesc;
 			private Iterator<Map.Entry<Field, IntegerAggregateInfo>> iter;
 
 			@Override
@@ -106,16 +107,10 @@ public class IntegerAggregator implements Aggregator {
 							value = (int) (aggregateInfo.sum / aggregateInfo.cnt);
 							break;
 					}
-					Tuple tuple;
+					Tuple tuple = new Tuple(getTupleDesc());
 					if (gbField == Aggregator.NO_GROUPING) {
-
-						final TupleDesc tupleDesc = new TupleDesc(new Type[]{Type.INT_TYPE});
-						tuple = new Tuple(tupleDesc);
 						tuple.setField(0, new IntField(value));
 					} else {
-
-						final TupleDesc tupleDesc = new TupleDesc(new Type[]{gbFieldType, Type.INT_TYPE});
-						tuple = new Tuple(tupleDesc);
 						tuple.setField(0, next.getKey());
 						tuple.setField(1, new IntField(value));
 					}
@@ -131,7 +126,15 @@ public class IntegerAggregator implements Aggregator {
 
 			@Override
 			public TupleDesc getTupleDesc() {
-				return null;
+				if (tupleDesc != null) {
+					return tupleDesc;
+				}
+				if (gbField == Aggregator.NO_GROUPING) {
+					this.tupleDesc = new TupleDesc(new Type[]{Type.INT_TYPE});
+				} else {
+					this.tupleDesc = new TupleDesc(new Type[]{gbFieldType, Type.INT_TYPE});
+				}
+				return tupleDesc;
 			}
 
 			@Override
