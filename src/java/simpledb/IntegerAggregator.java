@@ -43,14 +43,18 @@ public class IntegerAggregator implements Aggregator {
 	 * @param tup the Tuple containing an aggregate field and a group-by field
 	 */
 	public void mergeTupleIntoGroup(Tuple tup) {
+		Field key;
+		if(this.gbField == Aggregator.NO_GROUPING){
+			key = null;
+		}else{
+			key = tup.getField(this.gbField);
+		}
 		final Field field = tup.getField(afield);
 		assert field.getType() == Type.INT_TYPE;
 		final IntField field1 = (IntField) field;
-		final Field gbField = tup.getField(this.gbField);
-		this.group.compute(gbField, (k, v) -> {
+		this.group.compute(key, (k, v) -> {
 			if (v == null) {
 				v = new IntegerAggregateInfo();
-
 			}
 			v.addField(field1.getValue());
 			return v;

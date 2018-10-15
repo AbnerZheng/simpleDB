@@ -41,7 +41,7 @@ public class Aggregate extends Operator {
     	this.gfield = gfield;
     	this.aop = aop;
 	    final Type aType = child.getTupleDesc().getFieldType(afield);
-	    final Type gType = child.getTupleDesc().getFieldType(gfield);
+	    final Type gType = gfield == Aggregator.NO_GROUPING?null:child.getTupleDesc().getFieldType(gfield);
 	    if(aType == Type.INT_TYPE){
 	    	this.aggregator = new IntegerAggregator(gfield,gType,afield, aop);
 	    }else{

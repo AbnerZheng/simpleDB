@@ -44,7 +44,8 @@ public class StringAggregator implements Aggregator {
 	 * @param tup the Tuple containing an aggregate field and a group-by field
 	 */
 	public void mergeTupleIntoGroup(Tuple tup) {
-		this.group.compute(tup.getField(gbFiled), (key, value) -> {
+		Field key = gbFiled == Aggregator.NO_GROUPING ? null : tup.getField(gbFiled);
+		this.group.compute(key, (k, value) -> {
 			if (value == null) {
 				return 1;
 			} else {
