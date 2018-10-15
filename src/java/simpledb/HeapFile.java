@@ -32,7 +32,7 @@ public class HeapFile implements DbFile {
         this.file = f;
         this.tupleDesc = td;
         try {
-        	fileInputStream1 = new RandomAccessFile(file, "r");
+        	fileInputStream1 = new RandomAccessFile(file, "rw");
         } catch (FileNotFoundException e) {
         	fileInputStream1 = null;
             e.printStackTrace();
@@ -89,8 +89,9 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public void writePage(Page page) throws IOException {
-        // some code goes here
-        // not necessary for lab1
+        final int offset = page.getId().getPageNumber() * BufferPool.getPageSize();
+        this.fileInputStream.seek(offset);
+        this.fileInputStream.write(page.getPageData());
     }
 
     /**
@@ -103,9 +104,22 @@ public class HeapFile implements DbFile {
     // see DbFile.java for javadocs
     public ArrayList<Page> insertTuple(TransactionId tid, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        return null;
-        // not necessary for lab1
+        int pageNum = 0;
+        while(pageNum < this.numPages()) {
+            final HeapPage page = (HeapPage) Database.getBufferPool().getPage(tid, new HeapPageId(this.getId(), pageNum), Permissions.READ_WRITE);
+            if(page.getNumEmptySlots() > 0){
+                page.insertTuple(t);
+                return new ArrayList<Page>(){{add(page);}};
+            }
+            pageNum ++;
+        }
+        final int pid = this.numPages();
+        final byte[] emptyPageData = HeapPage.createEmptyPageData();
+        final HeapPage heapPage = new HeapPage(new HeapPageId(getId(), pid), emptyPageData);
+        heapPage.insertTuple(t);
+        writePage(heapPage);
+
+        return new ArrayList<Page>(){{add(heapPage);}};
     }
 
     // see DbFile.java for javadocs
