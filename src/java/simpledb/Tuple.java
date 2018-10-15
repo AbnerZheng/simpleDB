@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import static java.io.File.separator;
+
 /**
  * Tuple maintains information about the contents of a tuple. Tuples have a
  * specified schema specified by a TupleDesc object and contain Field objects
@@ -85,8 +87,14 @@ public class Tuple implements Serializable {
      * where \t is any whitespace (except a newline)
      */
     public String toString() {
-        // some code goes here
-        throw new UnsupportedOperationException("Implement this");
+    	StringBuilder s = new StringBuilder();
+        for (int i = 0; i < fields.length; i++) {
+            s.append(fields[i].toString());
+            if(i != fields.length - 1){
+                s.append("\t");
+            }
+        }
+        return s.toString();
     }
 
     /**

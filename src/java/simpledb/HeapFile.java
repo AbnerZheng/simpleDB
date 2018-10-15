@@ -18,7 +18,7 @@ public class HeapFile implements DbFile {
 
     private final File file;
     private final TupleDesc tupleDesc;
-    private final FileInputStream fileInputStream;
+    private final RandomAccessFile fileInputStream;
 
     /**
      * Constructs a heap file backed by the specified file.
@@ -28,11 +28,11 @@ public class HeapFile implements DbFile {
      *            file.
      */
     public HeapFile(File f, TupleDesc td){
-        FileInputStream fileInputStream1;
+        RandomAccessFile fileInputStream1;
         this.file = f;
         this.tupleDesc = td;
         try {
-            fileInputStream1 = new FileInputStream(file);
+        	fileInputStream1 = new RandomAccessFile(file, "r");
         } catch (FileNotFoundException e) {
         	fileInputStream1 = null;
             e.printStackTrace();
@@ -73,13 +73,14 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public Page readPage(PageId pid) {
-        if(numPages() < pid.getPageNumber() || pid.getPageNumber() < 0){
+        if(numPages() <= pid.getPageNumber() || pid.getPageNumber() < 0){
             throw new IllegalArgumentException();
         }
 
         final byte[] data = HeapPage.createEmptyPageData();
         try {
-            fileInputStream.read(data, BufferPool.getPageSize() * pid.getPageNumber(), BufferPool.getPageSize());
+        	fileInputStream.seek(BufferPool.getPageSize() * pid.getPageNumber());
+            fileInputStream.read(data,0 , BufferPool.getPageSize());
             return new HeapPage((HeapPageId) pid, data);
         } catch (IOException e) {
             throw new IllegalArgumentException();
@@ -114,7 +115,7 @@ public class HeapFile implements DbFile {
         return null;
         // not necessary for lab1
     }
-    private class HeapFileIterator extends AbstractDbFileIterator {
+    public class HeapFileIterator extends AbstractDbFileIterator {
         private int nextPageNumber;
         private TransactionId transactionId;
         private Iterator<Tuple> pageIter;
@@ -151,7 +152,8 @@ public class HeapFile implements DbFile {
 
         @Override
         public void rewind() throws DbException, TransactionAbortedException {
-
+        	this.nextPageNumber = 0;
+        	open();
         }
 
         @Override
