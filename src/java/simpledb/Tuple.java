@@ -113,4 +113,27 @@ public class Tuple implements Serializable {
     {
     	this.tupleDesc = td;
     }
+
+    @Override
+    public boolean equals(final Object obj) {
+    	if(this == obj){
+    	    return true;
+        }
+        if(obj instanceof Tuple){
+            final Tuple obj1 = (Tuple) obj;
+            if(obj1.getTupleDesc().equals(this.getTupleDesc())){
+                if(obj1.getRecordId().equals(getRecordId())){
+                    if(obj1.fields.length == fields.length){
+                        for (int i = 0; i < obj1.fields.length; i++) {
+                            if(!obj1.getField(i).equals(getField(i))){
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
