@@ -125,9 +125,9 @@ public class HeapFile implements DbFile {
     // see DbFile.java for javadocs
     public ArrayList<Page> deleteTuple(TransactionId tid, Tuple t) throws DbException,
                                                                               TransactionAbortedException {
-        // some code goes here
-        return null;
-        // not necessary for lab1
+        final HeapPage page = (HeapPage) Database.getBufferPool().getPage(tid,t.getRecordId().getPageId(), Permissions.READ_WRITE);
+        page.deleteTuple(t);
+        return new ArrayList<Page>(){{add(page);}};
     }
     public class HeapFileIterator extends AbstractDbFileIterator {
         private int nextPageNumber;

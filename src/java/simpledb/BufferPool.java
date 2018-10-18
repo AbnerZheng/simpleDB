@@ -1,7 +1,9 @@
 package simpledb;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
     private final Page[] pages;
-    private final Map<PageId, Page> pageTable;
+    private final Map<PageId, Integer> pageTable;
     private final LinkedList<Integer> freePageIndex;
 
     /**
@@ -77,9 +79,9 @@ public class BufferPool {
      */
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        final Page page = this.pageTable.get(pid);
-        if(page != null){
-            return page;
+        final Integer idx = this.pageTable.get(pid);
+        if(idx!= null){
+            return this.pages[idx];
         }
         if(freePageIndex.isEmpty()){
             throw new DbException("The buffer pool is full");
@@ -88,7 +90,7 @@ public class BufferPool {
         final DbFile databaseFile = Database.getCatalog().getDatabaseFile(pid.getTableId());
         final Page readPage = databaseFile.readPage(pid);
         pages[index] = readPage;
-        this.pageTable.put(pid, readPage);
+        this.pageTable.put(pid, index);
         return readPage;
     }
 
@@ -153,8 +155,15 @@ public class BufferPool {
      */
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        // not necessary for lab1
+        final ArrayList<Page> pages = Database.getCatalog().getDatabaseFile(tableId).insertTuple(tid, t);
+        pages.forEach(it -> {
+            it.markDirty(true, tid);
+            if(!this.pageTable.containsKey(it.getId())){
+                final Integer pop = this.freePageIndex.pop();
+                this.pageTable.put(it.getId(), pop);
+                this.pages[pop] = it;
+            }
+        });
     }
 
     /**
@@ -172,8 +181,11 @@ public class BufferPool {
      */
     public  void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        // not necessary for lab1
+        final ArrayList<Page> pages = Database.getCatalog().getDatabaseFile(t.getRecordId().getPageId().getTableId()).deleteTuple(tid, t);
+        pages.forEach(page ->{
+            page.markDirty(true, tid);
+        });
+
     }
 
     /**
@@ -188,13 +200,13 @@ public class BufferPool {
     }
 
     /** Remove the specific page id from the buffer pool.
-        Needed by the recovery manager to ensure that the
-        buffer pool doesn't keep a rolled back page in its
-        cache.
-        
-        Also used by B+ tree files to ensure that deleted pages
-        are removed from the cache so they can be reused safely
-    */
+     Needed by the recovery manager to ensure that the
+     buffer pool doesn't keep a rolled back page in its
+     cache.
+
+     Also used by B+ tree files to ensure that deleted pages
+     are removed from the cache so they can be reused safely
+     */
     public synchronized void discardPage(PageId pid) {
         // some code goes here
         // not necessary for lab1
