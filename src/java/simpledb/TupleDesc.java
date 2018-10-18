@@ -220,7 +220,7 @@ public class TupleDesc implements Serializable {
 	public String toString() {
 		String s = "";
 		for (int i = 0; i < numFields(); i++) {
-			s += getFieldType(i).toString() + getFieldName(i);
+			s += getFieldType(i).toString() + "(" + getFieldName(i) + ")";
 			if (i != numFields()) s += ",";
 		}
 		return s;

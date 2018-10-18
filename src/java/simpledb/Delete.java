@@ -9,6 +9,9 @@ import java.io.IOException;
 public class Delete extends Operator {
 
     private static final long serialVersionUID = 1L;
+    private final OpIterator child;
+    private final TransactionId tid;
+    private final TupleDesc tupleDesc;
 
     /**
      * Constructor specifying the transaction that this delete belongs to as
@@ -20,24 +23,27 @@ public class Delete extends Operator {
      *            The child operator from which to read tuples for deletion
      */
     public Delete(TransactionId t, OpIterator child) {
-        // some code goes here
+    	this.tid = t;
+    	this.child = child;
+    	this.tupleDesc = new TupleDesc(new Type[]{Type.INT_TYPE});
     }
 
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+    	return this.tupleDesc;
     }
 
     public void open() throws DbException, TransactionAbortedException {
-        // some code goes here
+    	super.open();
+    	child.open();
     }
 
     public void close() {
-        // some code goes here
+    	super.close();
+    	child.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        // some code goes here
+    	child.rewind();
     }
 
     /**
@@ -50,8 +56,18 @@ public class Delete extends Operator {
      * @see BufferPool#deleteTuple
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+    	int cnt = 0;
+    	while(child.hasNext()){
+		    final Tuple next = child.next();
+		    try {
+			    Database.getBufferPool().deleteTuple(tid, next);
+		    } catch (IOException e) {
+			    e.printStackTrace();
+		    }
+	    }
+	    final Tuple tuple = new Tuple(this.tupleDesc);
+    	tuple.setField(0, new IntField(cnt));
+    	return tuple;
     }
 
     @Override
