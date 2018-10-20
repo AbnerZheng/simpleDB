@@ -1,5 +1,7 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 /** Unique identifier for HeapPage objects. */
 public class HeapPageId implements PageId {
 
@@ -34,8 +36,8 @@ public class HeapPageId implements PageId {
     /**
      * @return a hash code for this page, represented by the concatenation of
      *   the table number and the page number (needed if a PageId is used as a
-     *   key in a hash table in the BufferPool, for example.)
-     * @see BufferPool
+     *   key in a hash table in the BufferPoolManager, for example.)
+     * @see BufferPoolManager
      */
     public int hashCode() {
     	return tableId * 31 + pgNo;

@@ -1,5 +1,7 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,14 +18,14 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Database {
     private static AtomicReference<Database> _instance = new AtomicReference<Database>(new Database());
     private final Catalog _catalog;
-    private final BufferPool _bufferpool;
+    private final BufferPoolManager _bufferpool;
 
     private final static String LOGFILENAME = "log";
     private final LogFile _logfile;
 
     private Database() {
         _catalog = new Catalog();
-        _bufferpool = new BufferPool(BufferPool.DEFAULT_PAGES);
+        _bufferpool = new BufferPoolManager(BufferPoolManager.DEFAULT_PAGES);
         LogFile tmp = null;
         try {
             tmp = new LogFile(new File(LOGFILENAME));
@@ -41,7 +43,7 @@ public class Database {
     }
 
     /** Return the buffer pool of the static Database instance */
-    public static BufferPool getBufferPool() {
+    public static BufferPoolManager getBufferPool() {
         return _instance.get()._bufferpool;
     }
 
@@ -54,12 +56,12 @@ public class Database {
      * Method used for testing -- create a new instance of the buffer pool and
      * return it
      */
-    public static BufferPool resetBufferPool(int pages) {
+    public static BufferPoolManager resetBufferPool(int pages) {
         java.lang.reflect.Field bufferPoolF=null;
         try {
             bufferPoolF = Database.class.getDeclaredField("_bufferpool");
             bufferPoolF.setAccessible(true);
-            bufferPoolF.set(_instance.get(), new BufferPool(pages));
+            bufferPoolF.set(_instance.get(), new BufferPoolManager(pages));
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
@@ -69,7 +71,7 @@ public class Database {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-//        _instance._bufferpool = new BufferPool(pages);
+//        _instance._bufferpool = new BufferPoolManager(pages);
         return _instance.get()._bufferpool;
     }
 

@@ -1,6 +1,8 @@
 
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.util.*;
 import java.io.*;
 
@@ -61,7 +63,7 @@ public interface DbFile {
 
     /**
      * Returns an iterator over all the tuples stored in this DbFile. The
-     * iterator must use {@link BufferPool#getPage}, rather than
+     * iterator must use {@link BufferPoolManager#getPage}, rather than
      * {@link #readPage} to iterate through the pages.
      *
      * @return an iterator over all the tuples stored in this DbFile.

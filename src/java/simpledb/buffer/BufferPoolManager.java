@@ -1,48 +1,50 @@
-package simpledb;
+package simpledb.buffer;
 
-import javax.xml.crypto.Data;
+import simpledb.*;
+
 import java.io.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * BufferPool manages the reading and writing of pages into memory from
+ * BufferPoolManager manages the reading and writing of pages into memory from
  * disk. Access methods call into it to retrieve pages, and it fetches
  * pages from the appropriate location.
  * <p>
- * The BufferPool is also responsible for locking;  when a transaction fetches
- * a page, BufferPool checks that the transaction has the appropriate
+ * The BufferPoolManager is also responsible for locking;  when a transaction fetches
+ * a page, BufferPoolManager checks that the transaction has the appropriate
  * locks to read/write the page.
  * 
  * @Threadsafe, all fields are final
  */
-public class BufferPool {
+public class BufferPoolManager {
     /** Bytes per page, including header. */
     private static final int DEFAULT_PAGE_SIZE = 4096;
 
     private static int pageSize = DEFAULT_PAGE_SIZE;
-    
+
     /** Default number of pages passed to the constructor. This is used by
-    other classes. BufferPool should use the numPages argument to the
+    other classes. BufferPoolManager should use the numPages argument to the
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
     private final Page[] pages;
     private final Map<PageId, Integer> pageTable;
     private final LinkedList<Integer> freePageIndex;
+    private LRUReplacer<PageId> lruReplacer;
 
     /**
-     * Creates a BufferPool that caches up to numPages pages.
+     * Creates a BufferPoolManager that caches up to numPages pages.
      *
      * @param numPages maximum number of pages in this buffer pool.
      */
-    public BufferPool(int numPages) {
+    public BufferPoolManager(int numPages) {
         this.pages = new Page[numPages];
         this.pageTable = new HashMap<>();
         this.freePageIndex = new LinkedList<>();
+        this.lruReplacer = new LRUReplacer<>();
         for (int i = 0; i < pages.length; i++) {
             freePageIndex.push(i);
         }
@@ -54,12 +56,12 @@ public class BufferPool {
     
     // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
     public static void setPageSize(int pageSize) {
-    	BufferPool.pageSize = pageSize;
+    	BufferPoolManager.pageSize = pageSize;
     }
     
     // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
     public static void resetPageSize() {
-    	BufferPool.pageSize = DEFAULT_PAGE_SIZE;
+    	BufferPoolManager.pageSize = DEFAULT_PAGE_SIZE;
     }
 
     /**
@@ -81,15 +83,17 @@ public class BufferPool {
         throws TransactionAbortedException, DbException {
         final Integer idx = this.pageTable.get(pid);
         if(idx!= null){
+            this.lruReplacer.insert(pid);
             return this.pages[idx];
         }
         if(freePageIndex.isEmpty()){
-            throw new DbException("The buffer pool is full");
+        	this.evictPage();
         }
         final Integer index = freePageIndex.pop();
         final DbFile databaseFile = Database.getCatalog().getDatabaseFile(pid.getTableId());
         final Page readPage = databaseFile.readPage(pid);
         pages[index] = readPage;
+        this.lruReplacer.insert(pid);
         this.pageTable.put(pid, index);
         return readPage;
     }
@@ -208,8 +212,12 @@ public class BufferPool {
      are removed from the cache so they can be reused safely
      */
     public synchronized void discardPage(PageId pid) {
-        // some code goes here
-        // not necessary for lab1
+    	if(this.pageTable.containsKey(pid)){
+            Integer index = this.pageTable.get(pid);
+            pages[index] = null;
+            this.pageTable.remove(pid);
+            this.freePageIndex.push(index);
+        }
     }
 
     /**
@@ -217,8 +225,16 @@ public class BufferPool {
      * @param pid an ID indicating the page to flush
      */
     private synchronized  void flushPage(PageId pid) throws IOException {
-        // some code goes here
-        // not necessary for lab1
+        Integer index = this.pageTable.get(pid);
+        if(index == null){
+            return;
+        }
+        Page page = pages[index];
+        if(page.isDirty()==null){
+            return;
+        }
+        DbFile databaseFile = Database.getCatalog().getDatabaseFile(pid.getTableId());
+        databaseFile.writePage(page);
     }
 
     /** Write all pages of the specified transaction to disk.
@@ -233,8 +249,15 @@ public class BufferPool {
      * Flushes the page to disk to ensure dirty pages are updated on disk.
      */
     private synchronized  void evictPage() throws DbException {
-        // some code goes here
-        // not necessary for lab1
+        PageId victim = this.lruReplacer.victim();
+        Integer index = this.pageTable.remove(victim);
+        try {
+            this.flushPage(victim);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.pages[index] = null;
+        this.freePageIndex.add(index);
     }
 
 }

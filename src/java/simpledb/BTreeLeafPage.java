@@ -1,14 +1,16 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.util.*;
 import java.io.*;
 
 /**
  * Each instance of BTreeLeafPage stores data for one page of a BTreeFile and 
- * implements the Page interface that is used by BufferPool.
+ * implements the Page interface that is used by BufferPoolManager.
  *
  * @see BTreeFile
- * @see BufferPool
+ * @see BufferPoolManager
  *
  */
 public class BTreeLeafPage extends BTreePage {
@@ -46,7 +48,7 @@ public class BTreeLeafPage extends BTreePage {
 	 * the slots of the page that are in use, and some number of tuple slots, 
 	 * as well as some extra bytes for the parent and sibling pointers.
 	 *  Specifically, the number of tuples is equal to: <p>
-	 *          floor((BufferPool.getPageSize()*8 - extra bytes*8) / (tuple size * 8 + 1))
+	 *          floor((BufferPoolManager.getPageSize()*8 - extra bytes*8) / (tuple size * 8 + 1))
 	 * <p> where tuple size is the size of tuples in this
 	 * database table, which can be determined via {@link Catalog#getTupleDesc}.
 	 * The number of 8-bit header words is equal to:
@@ -55,7 +57,7 @@ public class BTreeLeafPage extends BTreePage {
 	 * <p>
 	 * @see Database#getCatalog
 	 * @see Catalog#getTupleDesc
-	 * @see BufferPool#getPageSize()
+	 * @see BufferPoolManager#getPageSize()
 	 * 
 	 * @param id - the id of this page
 	 * @param data - the raw data of this page
@@ -113,7 +115,7 @@ public class BTreeLeafPage extends BTreePage {
 		int bitsPerTupleIncludingHeader = td.getSize() * 8 + 1;
 		// extraBits are: left sibling pointer, right sibling pointer, parent pointer
 		int extraBits = 3 * INDEX_SIZE * 8; 
-		int tuplesPerPage = (BufferPool.getPageSize()*8 - extraBits) / bitsPerTupleIncludingHeader; //round down
+		int tuplesPerPage = (BufferPoolManager.getPageSize() * 8 - extraBits) / bitsPerTupleIncludingHeader; //round down
 		return tuplesPerPage;
 	}
 
@@ -199,7 +201,7 @@ public class BTreeLeafPage extends BTreePage {
 	 * @return A byte array corresponding to the bytes of this page.
 	 */
 	public byte[] getPageData() {
-		int len = BufferPool.getPageSize();
+		int len = BufferPoolManager.getPageSize();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
 		DataOutputStream dos = new DataOutputStream(baos);
 
@@ -262,7 +264,7 @@ public class BTreeLeafPage extends BTreePage {
 		}
 
 		// padding
-		int zerolen = BufferPool.getPageSize() - (header.length + td.getSize() * tuples.length + 3 * INDEX_SIZE); //- numSlots * td.getSize();
+		int zerolen = BufferPoolManager.getPageSize() - (header.length + td.getSize() * tuples.length + 3 * INDEX_SIZE); //- numSlots * td.getSize();
 		byte[] zeroes = new byte[zerolen];
 		try {
 			dos.write(zeroes, 0, zerolen);

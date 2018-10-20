@@ -1,12 +1,14 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.*;
 
 /**
  * BTreeRootPtrPage stores the pointer to the root node used in the B+ tree and
- * implements Page Interface that is used by BufferPool
+ * implements Page Interface that is used by BufferPoolManager
  *
- * @see BufferPool
+ * @see BufferPoolManager
  */
 public class BTreeRootPtrPage implements Page {
 	// size of this page

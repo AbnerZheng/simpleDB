@@ -1,6 +1,6 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SystemTestUtil;
+import simpledb.buffer.BufferPoolManager;
 
 import static org.junit.Assert.*;
 
@@ -30,7 +30,7 @@ public class ScanTest extends SimpleDbTestBase {
                 ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
                 HeapFile f = SystemTestUtil.createRandomHeapFile(columns, rows, null, tuples);
                 SystemTestUtil.matchTuples(f, tuples);
-                Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+                Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
             }
         }
     }

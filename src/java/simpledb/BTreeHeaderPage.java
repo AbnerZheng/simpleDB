@@ -1,13 +1,15 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.*;
 
 /**
  * Each instance of BTreeHeaderPage stores data for one page of a BTreeFile and 
- * implements the Page interface that is used by BufferPool.
+ * implements the Page interface that is used by BufferPoolManager.
  *
  * @see BTreeFile
- * @see BufferPool
+ * @see BufferPoolManager
  *
  */
 public class BTreeHeaderPage implements Page {
@@ -31,7 +33,7 @@ public class BTreeHeaderPage implements Page {
 	 * The format of a BTreeHeaderPage is two pointers to the next and previous
 	 * header pages, followed by a set of bytes indicating which pages in the file
 	 * are used or available
-	 * @see BufferPool#getPageSize()
+	 * @see BufferPoolManager#getPageSize()
 	 * 
 	 */
 	public BTreeHeaderPage(BTreePageId id, byte[] data) throws IOException {
@@ -78,7 +80,7 @@ public class BTreeHeaderPage implements Page {
 	private static int getHeaderSize() {        
 		// pointerBytes: nextPage and prevPage pointers
 		int pointerBytes = 2 * INDEX_SIZE; 
-		return BufferPool.getPageSize() - pointerBytes;
+		return BufferPoolManager.getPageSize() - pointerBytes;
 	}
 
 	/**
@@ -132,7 +134,7 @@ public class BTreeHeaderPage implements Page {
 	 * @return A byte array correspond to the bytes of this page.
 	 */
 	public byte[] getPageData() {
-		int len = BufferPool.getPageSize();
+		int len = BufferPoolManager.getPageSize();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
 		DataOutputStream dos = new DataOutputStream(baos);
 
@@ -179,7 +181,7 @@ public class BTreeHeaderPage implements Page {
 	 * @return The returned ByteArray.
 	 */
 	public static byte[] createEmptyPageData() {
-		int len = BufferPool.getPageSize();
+		int len = BufferPoolManager.getPageSize();
 		return new byte[len]; //all 0
 	}
 

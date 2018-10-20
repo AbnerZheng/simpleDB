@@ -15,11 +15,11 @@ two-phase locking discipline are followed.  <p>
 <p>
 
 Many of the methods here are synchronized (to prevent concurrent log
-writes from happening); many of the methods in BufferPool are also
-synchronized (for similar reasons.)  Problem is that BufferPool writes
-log records (on page flushed) and the log file flushes BufferPool
+writes from happening); many of the methods in BufferPoolManager are also
+synchronized (for similar reasons.)  Problem is that BufferPoolManager writes
+log records (on page flushed) and the log file flushes BufferPoolManager
 pages (on checkpoints and recovery.)  This can lead to deadlock.  For
-that reason, any LogFile operation that needs to access the BufferPool
+that reason, any LogFile operation that needs to access the BufferPoolManager
 must not be declared synchronized and must begin with a block like:
 
 <p>

@@ -1,6 +1,7 @@
 package simpledb;
 
-import javax.xml.crypto.Data;
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.*;
 import java.util.*;
 
@@ -79,8 +80,8 @@ public class HeapFile implements DbFile {
 
         final byte[] data = HeapPage.createEmptyPageData();
         try {
-        	fileInputStream.seek(BufferPool.getPageSize() * pid.getPageNumber());
-            fileInputStream.read(data,0 , BufferPool.getPageSize());
+        	fileInputStream.seek(BufferPoolManager.getPageSize() * pid.getPageNumber());
+            fileInputStream.read(data,0 , BufferPoolManager.getPageSize());
             return new HeapPage((HeapPageId) pid, data);
         } catch (IOException e) {
             throw new IllegalArgumentException();
@@ -89,7 +90,7 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public void writePage(Page page) throws IOException {
-        final int offset = page.getId().getPageNumber() * BufferPool.getPageSize();
+        final int offset = page.getId().getPageNumber() * BufferPoolManager.getPageSize();
         this.fileInputStream.seek(offset);
         this.fileInputStream.write(page.getPageData());
     }
@@ -98,7 +99,7 @@ public class HeapFile implements DbFile {
      * Returns the number of pages in this HeapFile.
      */
     public int numPages() {
-        return (int) (file.length() / BufferPool.getPageSize());
+        return (int) (file.length() / BufferPoolManager.getPageSize());
     }
 
     // see DbFile.java for javadocs

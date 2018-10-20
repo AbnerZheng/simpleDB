@@ -1,5 +1,7 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 /** Unique identifier for BTreeInternalPage, BTreeLeafPage, BTreeHeaderPage
  *  and BTreeRootPtrPage objects. 
  */
@@ -66,8 +68,8 @@ public class BTreePageId implements PageId {
 	/**
 	 * @return a hash code for this page, represented by the concatenation of
 	 *   the table number, page number, and pgcateg (needed if a PageId is used as a
-	 *   key in a hash table in the BufferPool, for example.)
-	 * @see BufferPool
+	 *   key in a hash table in the BufferPoolManager, for example.)
+	 * @see BufferPoolManager
 	 */
 	public int hashCode() {
 		int code = (tableId << 16) + (pgNo << 2) + pgcateg;

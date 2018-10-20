@@ -8,6 +8,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import junit.framework.JUnit4TestAdapter;
+import simpledb.buffer.BufferPoolManager;
 
 public class DeadlockTest extends TestUtil.CreateHeapFile {
   private PageId p0, p1, p2;
@@ -18,7 +19,7 @@ public class DeadlockTest extends TestUtil.CreateHeapFile {
   private static final int WAIT_INTERVAL = 200;
 
   // just so we have a pointer shorter than Database.getBufferPool
-  private BufferPool bp;
+  private BufferPoolManager bp;
 
   /**
    * Set up initial resources for each unit test.
@@ -27,7 +28,7 @@ public class DeadlockTest extends TestUtil.CreateHeapFile {
     super.setUp();
 
     // clear all state from the buffer pool
-    bp = Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+    bp = Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
 
     // create a new empty HeapFile and populate it with three pages.
     // we should be able to add 504 tuples on an empty page.
@@ -52,7 +53,7 @@ public class DeadlockTest extends TestUtil.CreateHeapFile {
     bp.getPage(tid, p1, Permissions.READ_WRITE).markDirty(true, tid);
     bp.getPage(tid, p2, Permissions.READ_WRITE).markDirty(true, tid);
     bp.flushAllPages();
-    bp = Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+    bp = Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
   }
 
   /**

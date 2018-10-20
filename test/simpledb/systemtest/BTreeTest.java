@@ -1,22 +1,16 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SystemTestUtil;
+import simpledb.buffer.BufferPoolManager;
+
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.junit.After;
 import org.junit.Test;
-import org.junit.Before;
 
 import simpledb.*;
 import simpledb.BTreeUtility.*;
@@ -81,14 +75,14 @@ public class BTreeTest extends SimpleDbTestBase {
 	@After
 	public void tearDown() throws Exception {
 		// set the page size back to the default
-		BufferPool.resetPageSize();
+		BufferPoolManager.resetPageSize();
 		Database.reset();
 	}
 	
     /** Test that doing lots of inserts and deletes in multiple threads works */
     @Test public void testBigFile() throws Exception {
     	// For this test we will decrease the size of the Buffer Pool pages
-    	BufferPool.setPageSize(1024);
+    	BufferPoolManager.setPageSize(1024);
     	
     	// This should create a B+ tree with a packed second tier of internal pages
 		// and packed third tier of leaf pages
@@ -216,7 +210,7 @@ public class BTreeTest extends SimpleDbTestBase {
 		Database.getBufferPool().transactionComplete(tid);
 		
 		// set the page size back
-		BufferPool.resetPageSize();
+		BufferPoolManager.resetPageSize();
 		
     }
 

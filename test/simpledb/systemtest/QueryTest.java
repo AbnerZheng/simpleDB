@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import org.junit.Test;
 
-import simpledb.BufferPool;
+import simpledb.buffer.BufferPoolManager;
 import simpledb.Database;
 import simpledb.DbException;
 import simpledb.HeapFile;
@@ -29,7 +29,7 @@ public class QueryTest {
 	public static HeapFile createDuplicateHeapFile(ArrayList<ArrayList<Integer>> tuples, int columns, String colPrefix) throws IOException {
         File temp = File.createTempFile("table", ".dat");
         temp.deleteOnExit();
-        HeapFileEncoder.convert(tuples, temp, BufferPool.getPageSize(), columns);
+        HeapFileEncoder.convert(tuples, temp, BufferPoolManager.getPageSize(), columns);
         return Utility.openHeapFile(columns, colPrefix, temp);
 	}
 	

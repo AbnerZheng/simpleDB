@@ -5,13 +5,14 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import junit.framework.JUnit4TestAdapter;
+import simpledb.buffer.BufferPoolManager;
 
 public class TransactionTest extends TestUtil.CreateHeapFile {
   private PageId p0, p1, p2;
   private TransactionId tid1, tid2;
 
   // just so we have a pointer shorter than Database.getBufferPool()
-  private BufferPool bp;
+  private BufferPoolManager bp;
 
   /**
    * Set up initial resources for each unit test.
@@ -20,7 +21,7 @@ public class TransactionTest extends TestUtil.CreateHeapFile {
     super.setUp();
 
     // clear all state from the buffer pool
-    bp = Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+    bp = Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
 
     // create a new empty HeapFile and populate it with three pages.
     // we should be able to add 504 tuples on an empty page.
@@ -44,11 +45,11 @@ public class TransactionTest extends TestUtil.CreateHeapFile {
     bp.getPage(tid, p1, Permissions.READ_WRITE).markDirty(true, tid);
     bp.getPage(tid, p2, Permissions.READ_WRITE).markDirty(true, tid);
     bp.flushAllPages();
-    bp = Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+    bp = Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
   }
 
   /**
-   * Unit test for BufferPool.transactionComplete().
+   * Unit test for BufferPoolManager.transactionComplete().
    * Try to acquire locks that would conflict if old locks aren't released
    * during transactionComplete().
    */
@@ -62,7 +63,7 @@ public class TransactionTest extends TestUtil.CreateHeapFile {
   }
 
   /**
-   * Common unit test code for BufferPool.transactionComplete() covering
+   * Common unit test code for BufferPoolManager.transactionComplete() covering
    * commit and abort. Verify that commit persists changes to disk, and
    * that abort reverts pages to their previous on-disk state.
    */
@@ -77,7 +78,7 @@ public class TransactionTest extends TestUtil.CreateHeapFile {
     bp.transactionComplete(tid1, commit);
 
     // now, flush the buffer pool and access the page again from disk.
-    bp = Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+    bp = Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
     p = (HeapPage) bp.getPage(tid2, p2, Permissions.READ_WRITE);
     Iterator<Tuple> it = p.iterator();
 
@@ -97,7 +98,7 @@ public class TransactionTest extends TestUtil.CreateHeapFile {
   }
 
   /**
-   * Unit test for BufferPool.transactionComplete() assuing commit.
+   * Unit test for BufferPoolManager.transactionComplete() assuing commit.
    * Verify that a tuple inserted during a committed transaction is durable
    */
   @Test public void commitTransaction() throws Exception {
@@ -105,7 +106,7 @@ public class TransactionTest extends TestUtil.CreateHeapFile {
   }
 
   /**
-   * Unit test for BufferPool.transactionComplete() assuming abort.
+   * Unit test for BufferPoolManager.transactionComplete() assuming abort.
    * Verify that a tuple inserted during a committed transaction is durable
    */
   @Test public void abortTransaction() throws Exception {

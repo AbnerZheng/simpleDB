@@ -1,5 +1,7 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.IOException;
 
 /**
@@ -54,7 +56,7 @@ public class Delete extends Operator {
      * 
      * @return A 1-field tuple containing the number of deleted records.
      * @see Database#getBufferPool
-     * @see BufferPool#deleteTuple
+     * @see BufferPoolManager#deleteTuple
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
     	if(this.executed  == true){

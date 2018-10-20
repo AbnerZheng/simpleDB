@@ -1,5 +1,6 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
 import simpledb.systemtest.SimpleDbTestBase;
 import simpledb.Predicate.Op;
 
@@ -29,7 +30,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		Database.getBufferPool().transactionComplete(tid);
 		
 		// set the page size back to the default
-		BufferPool.resetPageSize();
+		BufferPoolManager.resetPageSize();
 		Database.reset();
 	}
 

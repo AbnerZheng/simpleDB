@@ -1,6 +1,6 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SystemTestUtil;
+import simpledb.buffer.BufferPoolManager;
 
 import static org.junit.Assert.*;
 
@@ -14,7 +14,6 @@ import java.util.Random;
 import java.util.Iterator;
 
 import org.junit.Test;
-import org.junit.Before;
 
 import simpledb.*;
 import simpledb.Predicate.Op;
@@ -38,7 +37,7 @@ public class BTreeScanTest extends SimpleDbTestBase {
                 BTreeFile f = BTreeUtility.createRandomBTreeFile(columns, rows, null, tuples, keyField);
                 BTreeScan scan = new BTreeScan(tid, f.getId(), "table", null);
                 SystemTestUtil.matchTuples(scan, tuples);
-                Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+                Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
             }
         }
     	Database.getBufferPool().transactionComplete(tid);
@@ -230,7 +229,7 @@ public class BTreeScanTest extends SimpleDbTestBase {
         	}
         }
         
-        Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+        Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
         table.readCount = 0;
         BTreeScan scan = new BTreeScan(tid, f.getId(), "table", ipred);
         SystemTestUtil.matchTuples(scan, tuplesFiltered);
@@ -248,7 +247,7 @@ public class BTreeScanTest extends SimpleDbTestBase {
         	}
         }
         
-        Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+        Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
         table.readCount = 0;
         scan = new BTreeScan(tid, f.getId(), "table", ipred);
         SystemTestUtil.matchTuples(scan, tuplesFiltered);
@@ -269,7 +268,7 @@ public class BTreeScanTest extends SimpleDbTestBase {
         	}
         }
         
-        Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+        Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
         table.readCount = 0;
         scan = new BTreeScan(tid, f.getId(), "table", ipred);
         SystemTestUtil.matchTuples(scan, tuplesFiltered);

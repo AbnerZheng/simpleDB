@@ -1,4 +1,6 @@
 package simpledb;
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.*;
 
 public class SimpleDb {
@@ -44,7 +46,7 @@ public class SimpleDb {
             }
 
             HeapFileEncoder.convert(sourceTxtFile,targetDatFile,
-                        BufferPool.getPageSize(),numOfAttributes,ts,fieldSeparator);
+                        BufferPoolManager.getPageSize(),numOfAttributes,ts,fieldSeparator);
 
         } catch (IOException e) {
                 throw new RuntimeException(e);

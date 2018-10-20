@@ -1,6 +1,7 @@
 package simpledb;
 
 import simpledb.TestUtil.SkeletonFile;
+import simpledb.buffer.BufferPoolManager;
 import simpledb.systemtest.SimpleDbTestBase;
 import simpledb.systemtest.SystemTestUtil;
 
@@ -57,7 +58,7 @@ public class HeapPageReadTest extends SimpleDbTestBase {
         try {
             File temp = File.createTempFile("table", ".dat");
             temp.deleteOnExit();
-            HeapFileEncoder.convert(table, temp, BufferPool.getPageSize(), 2);
+            HeapFileEncoder.convert(table, temp, BufferPoolManager.getPageSize(), 2);
             EXAMPLE_DATA = TestUtil.readFileBytes(temp.getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException(e);

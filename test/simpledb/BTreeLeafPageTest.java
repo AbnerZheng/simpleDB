@@ -2,6 +2,7 @@ package simpledb;
 
 import simpledb.BTreeFileEncoder.TupleComparator;
 import simpledb.TestUtil.SkeletonFile;
+import simpledb.buffer.BufferPoolManager;
 import simpledb.systemtest.SimpleDbTestBase;
 import simpledb.systemtest.SystemTestUtil;
 
@@ -58,7 +59,7 @@ public class BTreeLeafPageTest extends SimpleDbTestBase {
 		// Convert it to a BTreeLeafPage
 		try {
 			EXAMPLE_DATA = BTreeFileEncoder.convertToLeafPage(tuples, 
-					BufferPool.getPageSize(), 2, new Type[]{Type.INT_TYPE, Type.INT_TYPE}, 0);
+					BufferPoolManager.getPageSize(), 2, new Type[]{Type.INT_TYPE, Type.INT_TYPE}, 0);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

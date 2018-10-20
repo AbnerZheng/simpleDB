@@ -4,13 +4,14 @@ import java.util.*;
 import java.io.*;
 
 import simpledb.Predicate.Op;
+import simpledb.buffer.BufferPoolManager;
 
 /**
  * Each instance of BTreeInternalPage stores data for one page of a BTreeFile and 
- * implements the Page interface that is used by BufferPool.
+ * implements the Page interface that is used by BufferPoolManager.
  *
  * @see BTreeFile
- * @see BufferPool
+ * @see BufferPoolManager
  *
  */
 public class BTreeInternalPage extends BTreePage {
@@ -49,7 +50,7 @@ public class BTreeInternalPage extends BTreePage {
 	 * has m+1 pointers to children), and the category of all child pages (either 
 	 * leaf or internal).
 	 *  Specifically, the number of entries is equal to: <p>
-	 *          floor((BufferPool.getPageSize()*8 - extra bytes*8) / (entry size * 8 + 1))
+	 *          floor((BufferPoolManager.getPageSize()*8 - extra bytes*8) / (entry size * 8 + 1))
 	 * <p> where entry size is the size of entries in this index node
 	 * (key + child pointer), which can be determined via the key field and 
 	 * {@link Catalog#getTupleDesc}.
@@ -59,7 +60,7 @@ public class BTreeInternalPage extends BTreePage {
 	 * <p>
 	 * @see Database#getCatalog
 	 * @see Catalog#getTupleDesc
-	 * @see BufferPool#getPageSize()
+	 * @see BufferPoolManager#getPageSize()
 	 * 
 	 * @param id - the id of this page
 	 * @param data - the raw data of this page
@@ -120,7 +121,7 @@ public class BTreeInternalPage extends BTreePage {
 		// extraBits are: one parent pointer, 1 byte for child page category, 
 		// one extra child pointer (node with m entries has m+1 pointers to children), 1 bit for extra header
 		int extraBits = 2 * INDEX_SIZE * 8 + 8 + 1; 
-		int entriesPerPage = (BufferPool.getPageSize()*8 - extraBits) / bitsPerEntryIncludingHeader; //round down
+		int entriesPerPage = (BufferPoolManager.getPageSize() * 8 - extraBits) / bitsPerEntryIncludingHeader; //round down
 		return entriesPerPage;
 	}
 
@@ -232,7 +233,7 @@ public class BTreeInternalPage extends BTreePage {
 	 * @return A byte array correspond to the bytes of this page.
 	 */
 	public byte[] getPageData() {
-		int len = BufferPool.getPageSize();
+		int len = BufferPoolManager.getPageSize();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
 		DataOutputStream dos = new DataOutputStream(baos);
 
@@ -315,7 +316,7 @@ public class BTreeInternalPage extends BTreePage {
 		}
 
 		// padding
-		int zerolen = BufferPool.getPageSize() - (INDEX_SIZE + 1 + header.length + 
+		int zerolen = BufferPoolManager.getPageSize() - (INDEX_SIZE + 1 + header.length +
 				td.getFieldType(keyField).getLen() * (keys.length - 1) + INDEX_SIZE * children.length); 
 		byte[] zeroes = new byte[zerolen];
 		try {

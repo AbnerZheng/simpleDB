@@ -2,6 +2,7 @@ package simpledb;
 
 import simpledb.Predicate.Op;
 import simpledb.BTreeUtility.*;
+import simpledb.buffer.BufferPoolManager;
 import simpledb.systemtest.SimpleDbTestBase;
 
 import java.util.*;
@@ -16,7 +17,7 @@ public class BTreeDeadlockTest extends SimpleDbTestBase {
 	private static final int WAIT_INTERVAL = 200;
 
 	// just so we have a pointer shorter than Database.getBufferPool
-	private BufferPool bp;
+	private BufferPoolManager bp;
 	private BTreeFile bf;
 	private int item1;
 	private int item2;
@@ -32,7 +33,7 @@ public class BTreeDeadlockTest extends SimpleDbTestBase {
 		rand = new Random();
 		item1 = rand.nextInt(BTreeUtility.MAX_RAND_VALUE);
 		item2 = rand.nextInt(BTreeUtility.MAX_RAND_VALUE);
-		bp = Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+		bp = Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
 
 		// first make sure that item1 is not contained in our B+ tree
 		TransactionId tid = new TransactionId();

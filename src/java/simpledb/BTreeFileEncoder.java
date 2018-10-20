@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import simpledb.Predicate.Op;
+import simpledb.buffer.BufferPoolManager;
 
 /**
  * BTreeFileEncoder reads a comma delimited text file and converts it to
@@ -62,7 +63,7 @@ public class BTreeFileEncoder {
 			int keyField, int numFields)
 					throws IOException {
 		// convert the inFile to HeapFile first.
-		HeapFileEncoder.convert(inFile, hFile, BufferPool.getPageSize(), numFields);
+		HeapFileEncoder.convert(inFile, hFile, BufferPoolManager.getPageSize(), numFields);
 		HeapFile heapf = Utility.openHeapFile(numFields, hFile);
 
 		// add the heap file to B+ tree file
@@ -200,7 +201,7 @@ public class BTreeFileEncoder {
 			int numFields, Type[] typeAr, char fieldSeparator, int keyField) 
 					throws IOException, DbException, TransactionAbortedException {
 		// convert the inFile to HeapFile first.
-		HeapFileEncoder.convert(inFile, hFile, BufferPool.getPageSize(), numFields);
+		HeapFileEncoder.convert(inFile, hFile, BufferPoolManager.getPageSize(), numFields);
 		HeapFile heapf = Utility.openHeapFile(numFields, hFile);
 
 		// read all the tuples from the heap file and sort them on the keyField
@@ -331,7 +332,7 @@ public class BTreeFileEncoder {
 		setParents(bf, new BTreePageId(tableid, root, rootCategory), BTreeRootPtrPage.getId(tableid));
 		setRightSiblingPtrs(bf, lastPid, null);
 
-		Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+		Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
 		return bf;
 	}
 

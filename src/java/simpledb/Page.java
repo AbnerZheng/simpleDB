@@ -2,7 +2,7 @@ package simpledb;
 
 /**
  * Page is the interface used to represent pages that are resident in the
- * BufferPool.  Typically, DbFiles will read and write pages from disk.
+ * BufferPoolManager.  Typically, DbFiles will read and write pages from disk.
  * <p>
  * Pages may be "dirty", indicating that they have been modified since they
  * were last written out to disk.

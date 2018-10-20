@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import simpledb.buffer.BufferPoolManager;
 import simpledb.systemtest.SimpleDbTestBase;
 import simpledb.systemtest.SystemTestUtil;
 
@@ -38,7 +39,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
             throws IOException {
         File temp = File.createTempFile("table", ".dat");
         temp.deleteOnExit();
-        HeapFileEncoder.convert(tuples, temp, BufferPool.getPageSize(), columns);
+        HeapFileEncoder.convert(tuples, temp, BufferPoolManager.getPageSize(), columns);
         return Utility.openHeapFile(columns, colPrefix, temp);
     }
 

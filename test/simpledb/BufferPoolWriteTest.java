@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import simpledb.buffer.BufferPoolManager;
 import simpledb.systemtest.SystemTestUtil;
 import static org.junit.Assert.*;
 import junit.framework.JUnit4TestAdapter;
@@ -61,7 +62,7 @@ public class BufferPoolWriteTest extends TestUtil.CreateHeapFile {
     }
 
     /**
-     * Unit test for BufferPool.insertTuple()
+     * Unit test for BufferPoolManager.insertTuple()
      */
     @Test public void insertTuple() throws Exception {
         // we should be able to add 504 tuples on an empty page.
@@ -82,7 +83,7 @@ public class BufferPoolWriteTest extends TestUtil.CreateHeapFile {
     }
     
     /**
-     * Unit test for BufferPool.deleteTuple()
+     * Unit test for BufferPoolManager.deleteTuple()
      */
     @Test public void deleteTuple() throws Exception {
 
@@ -97,7 +98,7 @@ public class BufferPoolWriteTest extends TestUtil.CreateHeapFile {
     	}
     	
     	// clear the cache
-    	Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+    	Database.resetBufferPool(BufferPoolManager.DEFAULT_PAGES);
         
     	// delete 504 tuples from the first page
     	for (int i = 0; i < 504; ++i) {

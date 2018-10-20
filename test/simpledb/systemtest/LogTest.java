@@ -131,14 +131,14 @@ public class LogTest extends SimpleDbTestBase {
         setup();
 
         // *** Test:
-        // check that BufferPool.flushPage() calls LogFile.logWrite().
+        // check that BufferPoolManager.flushPage() calls LogFile.logWrite().
         doInsert(hf1, 1, 2);
 
         if(Database.getLogFile().getTotalRecords() != 4)
             throw new RuntimeException("LogTest: wrong # of log records; patch failed?");
 
         // *** Test:
-        // check that BufferPool.transactionComplete(commit=true)
+        // check that BufferPoolManager.transactionComplete(commit=true)
         // called Page.setBeforeImage().
         Transaction t1 = new Transaction();
         t1.start();

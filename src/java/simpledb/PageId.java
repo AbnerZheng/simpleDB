@@ -1,5 +1,7 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 /** PageId is an interface to a specific page of a specific table. */
 public interface PageId {
 
@@ -17,8 +19,8 @@ public interface PageId {
     /**
      * @return a hash code for this page, represented by the concatenation of
      *   the table number and the page number (needed if a PageId is used as a
-     *   key in a hash table in the BufferPool, for example.)
-     * @see BufferPool
+     *   key in a hash table in the BufferPoolManager, for example.)
+     * @see BufferPoolManager
      */
     public int hashCode();
 

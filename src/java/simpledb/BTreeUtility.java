@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 
 import simpledb.Predicate.Op;
+import simpledb.buffer.BufferPoolManager;
 
 /** Helper methods used for testing and implementing random features. */
 public class BTreeUtility {
@@ -154,7 +155,7 @@ public class BTreeUtility {
 
 		Type[] typeAr = new Type[columns];
 		Arrays.fill(typeAr, Type.INT_TYPE);
-		return BTreeFileEncoder.convert(tuples, hFile, bFile, BufferPool.getPageSize(),
+		return BTreeFileEncoder.convert(tuples, hFile, bFile, BufferPoolManager.getPageSize(),
 				columns, typeAr, ',', keyField) ;
 	}
 	
@@ -278,7 +279,7 @@ public class BTreeUtility {
 	 */
 	public static int getNumTuplesPerPage(int columns) {
 		int bytesPerTuple = Type.INT_TYPE.getLen() * columns * 8;
-		int tuplesPerPage = (BufferPool.getPageSize() * 8 - 3 * BTreeLeafPage.INDEX_SIZE * 8) /  (bytesPerTuple + 1);
+		int tuplesPerPage = (BufferPoolManager.getPageSize() * 8 - 3 * BTreeLeafPage.INDEX_SIZE * 8) / (bytesPerTuple + 1);
 		return tuplesPerPage;
 	}
 	
@@ -312,7 +313,7 @@ public class BTreeUtility {
 		Type[] typeAr = new Type[columns];
 		Arrays.fill(typeAr, Type.INT_TYPE);
 		byte[] data = BTreeFileEncoder.convertToLeafPage(BTreeUtility.generateRandomTuples(columns, numTuples, min, max), 
-				BufferPool.getPageSize(), columns, typeAr, keyField);
+				BufferPoolManager.getPageSize(), columns, typeAr, keyField);
 		BTreeLeafPage page = new BTreeLeafPage(pid, data, keyField);
 		return page;
 	}
@@ -325,7 +326,7 @@ public class BTreeUtility {
 		int nentrybytes = Type.INT_TYPE.getLen() + BTreeInternalPage.INDEX_SIZE;
 		// pointerbytes: one extra child pointer, parent pointer, child page category
 		int internalpointerbytes = 2 * BTreeLeafPage.INDEX_SIZE + 1; 
-		int entriesPerPage = (BufferPool.getPageSize() * 8 - internalpointerbytes * 8 - 1) /  (nentrybytes * 8 + 1);  //floor comes for free
+		int entriesPerPage = (BufferPoolManager.getPageSize() * 8 - internalpointerbytes * 8 - 1) / (nentrybytes * 8 + 1);  //floor comes for free
 		return entriesPerPage;
 	}
 	
@@ -359,7 +360,7 @@ public class BTreeUtility {
 	 */
 	public static BTreeInternalPage createRandomInternalPage(BTreePageId pid, int keyField, int childPageCategory, int numKeys, int minKey, int maxKey, int minChildPtr) throws IOException {
 		byte[] data = BTreeFileEncoder.convertToInternalPage(BTreeUtility.generateRandomEntries(numKeys, pid.getTableId(), childPageCategory, minKey, maxKey, minChildPtr), 
-				BufferPool.getPageSize(), Type.INT_TYPE, childPageCategory);
+				BufferPoolManager.getPageSize(), Type.INT_TYPE, childPageCategory);
 		BTreeInternalPage page = new BTreeInternalPage(pid, data, keyField);
 		return page;
 	}
@@ -410,7 +411,7 @@ public class BTreeUtility {
 
 		Type[] typeAr = new Type[columns];
 		Arrays.fill(typeAr, Type.INT_TYPE);
-		return BTreeFileEncoder.convert(tuples, hFile, bFile, BufferPool.getPageSize(),
+		return BTreeFileEncoder.convert(tuples, hFile, bFile, BufferPoolManager.getPageSize(),
 				columns, typeAr, ',', keyField) ;
 	}
 

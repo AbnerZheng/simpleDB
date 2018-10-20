@@ -1,5 +1,7 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.IOException;
 
 /**
@@ -57,15 +59,15 @@ public class Insert extends Operator {
     /**
      * Inserts tuples read from child into the tableId specified by the
      * constructor. It returns a one field tuple containing the number of
-     * inserted records. Inserts should be passed through BufferPool. An
-     * instances of BufferPool is available via Database.getBufferPool(). Note
+     * inserted records. Inserts should be passed through BufferPoolManager. An
+     * instances of BufferPoolManager is available via Database.getBufferPool(). Note
      * that insert DOES NOT need check to see if a particular tuple is a
      * duplicate before inserting it.
      *
      * @return A 1-field tuple containing the number of inserted records, or
      *         null if called more than once.
      * @see Database#getBufferPool
-     * @see BufferPool#insertTuple
+     * @see BufferPoolManager#insertTuple
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
     	if(this.executed == true){

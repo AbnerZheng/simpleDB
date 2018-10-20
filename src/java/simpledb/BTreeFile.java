@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import simpledb.Predicate.Op;
+import simpledb.buffer.BufferPoolManager;
 
 /**
  * BTreeFile is an implementation of a DbFile that stores a B+ tree.
@@ -71,7 +72,7 @@ public class BTreeFile implements DbFile {
 
 	/**
 	 * Read a page from the file on disk. This should not be called directly
-	 * but should be called from the BufferPool via getPage()
+	 * but should be called from the BufferPoolManager via getPage()
 	 * 
 	 * @param pid - the id of the page to read from disk
 	 * @return the page constructed from the contents on disk
@@ -97,19 +98,19 @@ public class BTreeFile implements DbFile {
 				return p;
 			}
 			else {
-				byte pageBuf[] = new byte[BufferPool.getPageSize()];
-				if (bis.skip(BTreeRootPtrPage.getPageSize() + (id.getPageNumber()-1) * BufferPool.getPageSize()) !=
-						BTreeRootPtrPage.getPageSize() + (id.getPageNumber()-1) * BufferPool.getPageSize()) {
+				byte pageBuf[] = new byte[BufferPoolManager.getPageSize()];
+				if (bis.skip(BTreeRootPtrPage.getPageSize() + (id.getPageNumber()-1) * BufferPoolManager.getPageSize()) !=
+						BTreeRootPtrPage.getPageSize() + (id.getPageNumber()-1) * BufferPoolManager.getPageSize()) {
 					throw new IllegalArgumentException(
 							"Unable to seek to correct place in BTreeFile");
 				}
-				int retval = bis.read(pageBuf, 0, BufferPool.getPageSize());
+				int retval = bis.read(pageBuf, 0, BufferPoolManager.getPageSize());
 				if (retval == -1) {
 					throw new IllegalArgumentException("Read past end of table");
 				}
-				if (retval < BufferPool.getPageSize()) {
+				if (retval < BufferPoolManager.getPageSize()) {
 					throw new IllegalArgumentException("Unable to read "
-							+ BufferPool.getPageSize() + " bytes from BTreeFile");
+					                                   + BufferPoolManager.getPageSize() + " bytes from BTreeFile");
 				}
 				Debug.log(1, "BTreeFile.readPage: read page %d", id.getPageNumber());
 				if(id.pgcateg() == BTreePageId.INTERNAL) {
@@ -140,7 +141,7 @@ public class BTreeFile implements DbFile {
 
 	/**
 	 * Write a page to disk.  This should not be called directly but should 
-	 * be called from the BufferPool when pages are flushed to disk
+	 * be called from the BufferPoolManager when pages are flushed to disk
 	 * 
 	 * @param page - the page to write to disk
 	 */
@@ -154,7 +155,7 @@ public class BTreeFile implements DbFile {
 			rf.close();
 		}
 		else {
-			rf.seek(BTreeRootPtrPage.getPageSize() + (page.getId().getPageNumber()-1) * BufferPool.getPageSize());
+			rf.seek(BTreeRootPtrPage.getPageSize() + (page.getId().getPageNumber()-1) * BufferPoolManager.getPageSize());
 			rf.write(data);
 			rf.close();
 		}
@@ -165,7 +166,7 @@ public class BTreeFile implements DbFile {
 	 */
 	public int numPages() {
 		// we only ever write full pages
-		return (int) ((f.length() - BTreeRootPtrPage.getPageSize())/ BufferPool.getPageSize());
+		return (int) ((f.length() - BTreeRootPtrPage.getPageSize()) / BufferPoolManager.getPageSize());
 	}
 
 	/**
@@ -946,7 +947,7 @@ public class BTreeFile implements DbFile {
 		
 		// write empty page to disk
 		RandomAccessFile rf = new RandomAccessFile(f, "rw");
-		rf.seek(BTreeRootPtrPage.getPageSize() + (emptyPageNo-1) * BufferPool.getPageSize());
+		rf.seek(BTreeRootPtrPage.getPageSize() + (emptyPageNo-1) * BufferPoolManager.getPageSize());
 		rf.write(BTreePage.createEmptyPageData());
 		rf.close();
 		
@@ -983,7 +984,7 @@ public class BTreeFile implements DbFile {
 //					// It just means we have an empty root page
 //					return;
 //				}
-//				long newSize = f.length() - BufferPool.getPageSize();
+//				long newSize = f.length() - BufferPoolManager.getPageSize();
 //				FileOutputStream fos = new FileOutputStream(f, true);
 //				FileChannel fc = fos.getChannel();
 //				fc.truncate(newSize);

@@ -1,13 +1,15 @@
 package simpledb;
 
+import simpledb.buffer.BufferPoolManager;
+
 import java.io.*;
 
 /**
  * Each instance of BTreeInternalPage stores data for one page of a BTreeFile and 
- * implements the Page interface that is used by BufferPool.
+ * implements the Page interface that is used by BufferPoolManager.
  *
  * @see BTreeFile
- * @see BufferPool
+ * @see BufferPoolManager
  *
  */
 public abstract class BTreePage implements Page {
@@ -32,7 +34,7 @@ public abstract class BTreePage implements Page {
 	 * has m+1 pointers to children), and the category of all child pages (either 
 	 * leaf or internal).
 	 *  Specifically, the number of entries is equal to: <p>
-	 *          floor((BufferPool.getPageSize()*8 - extra bytes*8) / (entry size * 8 + 1))
+	 *          floor((BufferPoolManager.getPageSize()*8 - extra bytes*8) / (entry size * 8 + 1))
 	 * <p> where entry size is the size of entries in this index node
 	 * (key + child pointer), which can be determined via the key field and 
 	 * {@link Catalog#getTupleDesc}.
@@ -42,7 +44,7 @@ public abstract class BTreePage implements Page {
 	 * <p>
 	 * @see Database#getCatalog
 	 * @see Catalog#getTupleDesc
-	 * @see BufferPool#getPageSize()
+	 * @see BufferPoolManager#getPageSize()
 	 * 
 	 * @param id - the id of this page
 	 * @param data - the raw data of this page
@@ -71,7 +73,7 @@ public abstract class BTreePage implements Page {
 	 * @return The returned ByteArray.
 	 */
 	public static byte[] createEmptyPageData() {
-		int len = BufferPool.getPageSize();
+		int len = BufferPoolManager.getPageSize();
 		return new byte[len]; //all 0
 	}
 

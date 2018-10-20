@@ -1,6 +1,6 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SimpleDbTestBase;
+import simpledb.buffer.BufferPoolManager;
 import simpledb.Predicate.Op;
 import simpledb.*;
 
@@ -29,7 +29,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		Database.getBufferPool().transactionComplete(tid);
 
 		// set the page size back to the default
-		BufferPool.resetPageSize();
+		BufferPoolManager.resetPageSize();
 		Database.reset();
 
 	}
@@ -247,7 +247,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 	@Test
 	public void testDeleteInternalPages() throws Exception {
     	// For this test we will decrease the size of the Buffer Pool pages
-    	BufferPool.setPageSize(1024);
+    	BufferPoolManager.setPageSize(1024);
 		
 		// This should create a B+ tree with three nodes in the second tier
 		// and 252 nodes in the third tier
