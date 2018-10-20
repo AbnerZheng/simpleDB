@@ -4,6 +4,11 @@ package simpledb;
  */
 public class IntHistogram {
 
+    private final Integer[] buckets;
+    private final int min;
+    private final int max;
+    private int sum;
+
     /**
      * Create a new IntHistogram.
      * 
@@ -21,7 +26,13 @@ public class IntHistogram {
      * @param max The maximum integer value that will ever be passed to this class for histogramming
      */
     public IntHistogram(int buckets, int min, int max) {
-    	// some code goes here
+    	this.min = min;
+    	this.max = max;
+    	this.sum = 0;
+    	this.buckets = new Integer[buckets];
+        for (int i = 0; i < buckets; i++) {
+            this.buckets[i] = 0;
+        }
     }
 
     /**
@@ -29,7 +40,16 @@ public class IntHistogram {
      * @param v Value to add to the histogram
      */
     public void addValue(int v) {
-    	// some code goes here
+        int i = getBucketIndex(v);
+        this.sum += 1;
+        buckets[i]++;
+    }
+    private int getBucketIndex(int v){
+    	int i = (v - min) * this.buckets.length / (max - min);
+        if(i == this.buckets.length){
+            i--;
+        }
+        return i;
     }
 
     /**
@@ -43,15 +63,58 @@ public class IntHistogram {
      * @return Predicted selectivity of this particular operator and value
      */
     public double estimateSelectivity(Predicate.Op op, int v) {
-
-    	// some code goes here
-        return -1.0;
+    	double res = 0;
+        switch (op){
+            case EQUALS:
+            	res = this.equalSelectivity(v);
+                break;
+            case NOT_EQUALS:
+                res = 1 - this.equalSelectivity(v);
+                break;
+            case LESS_THAN:
+            	res = this.lessSelectivity(v);
+            	break;
+            case GREATER_THAN_OR_EQ:
+                res = 1.0 - this.lessSelectivity(v);
+                break;
+            case LESS_THAN_OR_EQ:
+                res = this.lessSelectivity(v) + equalSelectivity(v);
+                break;
+            case GREATER_THAN:
+                res = 1 - this.lessSelectivity(v) - equalSelectivity(v);
+                break;
+        }
+        return res;
     }
-    
+
+    private double lessSelectivity(final int v){
+        int index = getBucketIndex(v);
+        if(index < 0){
+            return 0;
+        }
+        if(index >= this.buckets.length){
+            return 1;
+        }
+        double i = this.buckets[index] * (this.buckets.length * (v - min) / (max - min) - index);
+        for (int j = 0; j < index; j++) {
+            i += this.buckets[j];
+        }
+        return i / sum;
+    }
+
+    private double equalSelectivity(final int v) {
+        int index = getBucketIndex(v);
+        if(index < 0 || index >= this.buckets.length){
+        	return 0;
+        }
+        int bucket = this.buckets[index];
+        return 1.0 * bucket / sum;
+    }
+
     /**
      * @return
      *     the average selectivity of this histogram.
-     *     
+     *
      *     This is not an indispensable method to implement the basic
      *     join optimization. It may be needed if you want to
      *     implement a more efficient optimization
@@ -61,7 +124,7 @@ public class IntHistogram {
         // some code goes here
         return 1.0;
     }
-    
+
     /**
      * @return A string describing this histogram, for debugging purposes
      */
